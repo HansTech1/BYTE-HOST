@@ -1,0 +1,65 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hans Tech File Share</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+    h1 { color: #007bff; }
+    .file-list { margin-top: 2rem; }
+    .file-item { padding: 0.5rem; border-bottom: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+  <h1>🚀 Hans Tech File Share</h1>
+  <form id="uploadForm">
+    <input type="file" name="file" required />
+    <button type="submit">Upload</button>
+  </form>
+
+  <div class="file-list" id="fileList"></div>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const fileList = document.getElementById('fileList');
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const file = form.file.files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      alert('Uploaded!\nDownload: ' + data.download_url);
+      loadFiles();
+    };
+
+    async function loadFiles() {
+      const res = await fetch('/dashboard-data');
+      const { files } = await res.json();
+
+      fileList.innerHTML = files.map(f => `
+        <div class="file-item">
+          <strong>${f.filename}</strong><br/>
+          <a href="/file/${f.id}" target="_blank">Download</a>
+          &nbsp;|&nbsp;
+          <a href="/api/${f.id}" target="_blank">API</a>
+        </div>
+      `).join('');
+    }
+
+    loadFiles();
+  </script>
+</body>
+</html>
